@@ -2,99 +2,90 @@ from datetime import datetime
 
 class Account:
     def __init__(self, account_id, balance):
-        self.balance = balance
         self.account_id = account_id
-        
-def test_account():
-    account = Account(100)
-    assert account.balance == 100
-    
-def deposit(account, amount):
-    account.balance += amount
-    
-def test_deposit():
-    account = Account(100)
-    deposit(account, 55)
-    assert account.balance == 155
-    
-def withdraw(self, amount):
-    if self.balance >= amount:
-        self.balance -= amount
-    else:
-        raise ValueError("Insufficient funds")
+        self.balance = balance
 
+    def deposit(self, amount):
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if self.balance >= amount:
+            self.balance -= amount
+        else:
+            raise ValueError("Insufficient funds")
+
+    def get_balance(self):
+        return self.balance
+
+    def __str__(self):
+        return f"Account {self.account_id}: Balance = {self.balance}"
+
+def test_account():
+    account = Account("001", 100)
+    assert account.balance == 100
+
+def test_deposit():
+    account = Account("001", 100)
+    account.deposit(55)
+    assert account.balance == 155
 
 def test_withdraw():
-    account = Account(100)
-    withdraw(account, 55)
-    assert account.balance ==45
-    
-def get_balance(self):
-    return self.balance
-    
-    
-class savingsAccount(Account):
-    def __init__(self, balance, interest_rate):
-        super().__init__(balance)
+    account = Account("001", 100)
+    account.withdraw(55)
+    assert account.balance == 45
+
+class SavingsAccount(Account):
+    def __init__(self, account_id, balance, interest_rate):
+        super().__init__(account_id, balance)
         self.interest_rate = interest_rate
-        
+        self.transactions = []
+
     def add_interest(self):
-        self.balance += self.balance * self.interest_rate
-        
+        interest = self.balance * self.interest_rate
+        self.balance += interest
+        self.transactions.append(f"Interest added: {interest}")
+
     def automatic_deposit(self, source_account, amount):
         if source_account.balance >= amount:
             source_account.withdraw(amount)
-            self>deposit(amount)
+            self.deposit(amount)
             print(f"Automatically deposited {amount} from source account")
         else:
-            print(" Transfer failed: insufficient funds")
-            
-    def withdraw(self, amount):
-        if  self.balance >= amount:
-            super().withdraw(amount)
-        else:
-            print("Withdraw failed: insufficient funds")
-            
-    def deposit(self, amount):
-        super().deposit(amount)
-        self.transactions.append(f"Deposited:{amount}")
-               
+            print("Transfer failed: insufficient funds")
+
     def get_transaction_history(self):
         return self.transactions
-    # polymorphism
+
     def get_balance(self):
         return f"Savings Account Balance: {self.balance}"
-    
+
+class CheckingAccount(Account):
+    def __init__(self, account_id, balance, overdraft_limit):
+        super().__init__(account_id, balance)
+        self.overdraft_limit = overdraft_limit
+
+    def withdraw(self, amount):
+        if self.balance + self.overdraft_limit >= amount:
+            self.balance -= amount
+        else:
+            print("Withdrawal failed: insufficient funds")
+
+    def get_balance(self):
+        return f"Checking Account Balance: {self.balance}"
+
 class Transaction:
-    def __init__ (self, account, amount, transaction_type):
+    def __init__(self, account, amount, transaction_type):
         self.account = account
         self.amount = amount
         self.transaction_type = transaction_type
         self.timestamp = datetime.now()
-        
+
     def process(self):
         if self.transaction_type == "deposit":
             self.account.deposit(self.amount)
         elif self.transaction_type == "withdraw":
             self.account.withdraw(self.amount)
- 
-class CheckingAccount(Account):
-    def __init__(self, balance, overdraft_limit):
-         super().__init__(balance)  
-         self.overdraft_limit = overdraft_limit
-    def withdraw(self, amount):
-        if self.balance + self.overdraft_limit >= amount:
-            self.balance -= amount
-        else:
-            print("Withdraw failed: insufficient funds")
-            
-    def get_balance(self):
-        return f"Checking Account Balance: {self.balance}"
-    
-    # function to print balance using polymorphism
-    def print_balance(account):
-        print(account.get_balance())
-        
+
 class Bank:
     def __init__(self):
         self.accounts = {}
@@ -140,16 +131,14 @@ print(bank)
 bank.delete_account("456")
 print(bank)
 
-# exception handling for withdrawal
+# Exception handling for withdrawal
 try:
     bank.withdraw_from_account("123", 2000)
 except ValueError as e:
     print(e)
-    
-            
+
 def main():
     bank = Bank()
-
     running = True
 
     while running:
