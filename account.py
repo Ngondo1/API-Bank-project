@@ -1,8 +1,9 @@
 from datetime import datetime
 
 class Account:
-    def __init__(self, balance):
+    def __init__(self, account_id, balance):
         self.balance = balance
+        self.account_id = account_id
         
 def test_account():
     account = Account(100)
@@ -16,8 +17,12 @@ def test_deposit():
     deposit(account, 55)
     assert account.balance == 155
     
-def withdraw(account, amount):
-    account.balance -= amount
+def withdraw(self, amount):
+    if self.balance >= amount:
+        self.balance -= amount
+    else:
+        raise ValueError("Insufficient funds")
+
 
 def test_withdraw():
     account = Account(100)
@@ -90,48 +95,89 @@ class CheckingAccount(Account):
     def print_balance(account):
         print(account.get_balance())
         
-        
-running = True
-while running:
-    # create instances of the classes based on user input
-    savings_balance = float(input("Enter the initial balance for the savings account: "))
-    savings_interest_rate = float(input("Enter the interest rate for the savings account: "))
-    savings = savingsAccount(savings_balance, savings_interest_rate)
+class Bank:
+    def __init__(self):
+        self.accounts = {}
 
-    checking_balance = float(input("Enter the initial balance for the checking account: "))
-    checking_overdraft_limit = float(input("Enter the overdraft limit for the checking account: "))
-    checking = CheckingAccount(checking_balance, checking_overdraft_limit)
+    def add_account(self, account_id, balance):
+        if account_id in self.accounts:
+            raise ValueError("Account already exists")
+        self.accounts[account_id] = Account(account_id, balance)
 
-    # using polymorphism
-    checking.print_balance()
-    savings.print_balance() 
+    def update_account(self, account_id, balance):
+        if account_id not in self.accounts:
+            raise ValueError("Account does not exist")
+        self.accounts[account_id].balance = balance
 
-    print("1. Test account")
-    print("2. Test deposit")
-    print("3. Test withdraw")
-    print("4. Exit")
+    def delete_account(self, account_id):
+        if account_id in self.accounts:
+            del self.accounts[account_id]
+        else:
+            raise ValueError("Account does not exist")
 
-    choice = input("Enter your choice:")
+    def get_account(self, account_id):
+        if account_id in self.accounts:
+            return self.accounts[account_id]
+        else:
+            raise ValueError("Account does not exist")
+
+    def withdraw_from_account(self, account_id, amount):
+        if account_id in self.accounts:
+            self.accounts[account_id].withdraw(amount)
+        else:
+            raise ValueError("Account does not exist")
+
+    def __str__(self):
+        return "\n".join(str(account) for account in self.accounts.values())
+
+# Example usage
+bank = Bank()
+bank.add_account("123", 1000)
+bank.add_account("456", 2000)
+print(bank)
+bank.update_account("123", 1500)
+print(bank)
+bank.delete_account("456")
+print(bank)
+
+# exception handling for withdrawal
+try:
+    bank.withdraw_from_account("123", 2000)
+except ValueError as e:
+    print(e)
     
-    if choice == '1':
-        test_account()
-        print("Test account passed")
-        
-    elif choice == '2':
-        test_deposit()
-        print("Test deposit passed")
-        
-    elif choice == '3':
-        test_withdraw()
-        print("Test withdraw passed")
-        
-    elif choice == '4':
-        running = False
-        
-    else:
-        print("invalid choice")
+            
+def main():
+    bank = Bank()
 
-    
+    running = True
 
-    
-    
+    while running:
+        print("\n1. Add Account")
+        print("\n2. Update Account")
+        print("\n3. Delete Account")
+        print("\n4. Exit")
+
+        choice = input("Enter your choice: ")
+
+        try:
+            if choice == '1':
+                account_id = input("Enter account ID: ")
+                balance = float(input("Enter initial balance: "))
+                bank.add_account(account_id, balance)
+            elif choice == '2':
+                account_id = input("Enter account ID: ")
+                balance = float(input("Enter new balance: "))
+                bank.update_account(account_id, balance)
+            elif choice == '3':
+                account_id = input("Enter account ID: ")
+                bank.delete_account(account_id)
+            elif choice == '4':
+                running = False
+            else:
+                print("Invalid choice. Please try again.")
+        except ValueError as e:
+            print(e)
+
+if __name__ == "__main__":
+    main()
