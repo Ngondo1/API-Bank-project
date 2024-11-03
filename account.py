@@ -33,6 +33,8 @@ def test_withdraw():
     account = Account("001", 100)
     account.withdraw(55)
     assert account.balance == 45
+    
+account = Account(account_id="001", balance=1000)
 
 class SavingsAccount(Account):
     def __init__(self, account_id, balance, interest_rate):
@@ -58,6 +60,9 @@ class SavingsAccount(Account):
 
     def get_balance(self):
         return f"Savings Account Balance: {self.balance}"
+    
+nyakio = SavingsAccount(account_id="001", balance=1000, interest_rate=0.05)
+ngondo = SavingsAccount(account_id="002", balance=2000, interest_rate=0.05)
 
 class CheckingAccount(Account):
     def __init__(self, account_id, balance, overdraft_limit):
@@ -73,20 +78,23 @@ class CheckingAccount(Account):
     def get_balance(self):
         return f"Checking Account Balance: {self.balance}"
 
-class Transaction:
-    def __init__(self, account, amount, transaction_type):
-        self.account = account
+class Transaction(Account):
+    def __init__(self, account_id, balance, amount, transaction_type):
+        super().__init__(account_id, balance)
         self.amount = amount
         self.transaction_type = transaction_type
         self.timestamp = datetime.now()
 
     def process(self):
         if self.transaction_type == "deposit":
-            self.account.deposit(self.amount)
+            account.deposit(self.amount)
         elif self.transaction_type == "withdraw":
-            self.account.withdraw(self.amount)
+            account.withdraw(self.amount)
+        else:
+            raise ValueError("Invalid transaction type")
+transaction = Transaction(account_id="001", balance=1000, amount=500, transaction_type="withdraw")
 
-class Bank:
+class Bank(Account):
     def __init__(self):
         self.accounts = {}
 
@@ -145,7 +153,8 @@ def main():
         print("\n1. Add Account")
         print("\n2. Update Account")
         print("\n3. Delete Account")
-        print("\n4. Exit")
+        print("\n4. Transact")
+        print("\n5. Exit")
 
         choice = input("Enter your choice: ")
 
@@ -161,8 +170,30 @@ def main():
             elif choice == '3':
                 account_id = input("Enter account ID: ")
                 bank.delete_account(account_id)
-            elif choice == '4':
+            elif choice == '5':
                 running = False
+            elif choice == '4':
+                account_id = input("Enter account ID for transaction: ")
+                amount = float(input("Enter amount for transaction: "))
+                transaction_type = input("Enter transaction type (deposit/withdraw): ")
+                
+                if account_id not in bank.accounts:
+                    print("Account does not exist.")
+                    continue
+                
+                account = bank.get_account(account_id)
+                transaction = Transaction(account_id=account_id, balance=account.get_balance(), amount=amount, transaction_type=transaction_type)
+                
+                try:
+                    transaction.process()
+                    print(f"Transaction successful. New balance: {account.get_balance()}")
+                except ValueError as e:
+                    print(e)
+
+                
+            
+                
+                
             else:
                 print("Invalid choice. Please try again.")
         except ValueError as e:
