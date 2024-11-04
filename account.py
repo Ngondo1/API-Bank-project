@@ -61,7 +61,7 @@ class SavingsAccount(Account):
     def get_balance(self):
         return f"Savings Account Balance: {self.balance}"
     
-nyakio = SavingsAccount(account_id="001", balance=1000, interest_rate=0.05)
+kimemia = SavingsAccount(account_id="001", balance=1000, interest_rate=0.05)
 ngondo = SavingsAccount(account_id="002", balance=2000, interest_rate=0.05)
 
 class CheckingAccount(Account):
@@ -186,7 +186,8 @@ def main():
                 
                 try:
                     transaction.process()
-                    print(f"Transaction successful. New balance: {account.get_balance()}")
+                    updated_balance = account.get_balance()
+                    print(f"Transaction successful. New balance: {updated_balance}")
                 except ValueError as e:
                     print(e)
 
